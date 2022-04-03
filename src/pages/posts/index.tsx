@@ -28,13 +28,13 @@ export default function Posts({ posts }: PostsProps) {
         <main className={styles.Container}>
           <div className={styles.posts}>
             { posts.map(post => (
-            //   <Link href={`/posts/${post.slug}`} key={post.slug} >
-                <a key={post.slug} href="#">
+            <Link href={`/posts/${post.slug}`} key={post.slug} >
+                <a key={post.slug}>
                   <time>{post.updatedAt}</time>
                   <strong>{post.title}</strong>
                   <p>{post.excerpt}</p>
                 </a>
-            //   </Link>
+            </Link>
             )) }
           </div>
         </main>
@@ -48,8 +48,6 @@ export default function Posts({ posts }: PostsProps) {
       pageSize: 100,
     });
 
-    console.log(response)
-  
     //formatar dados no momento da busca 
     const posts = response.map((post) => {
       return {
