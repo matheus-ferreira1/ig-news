@@ -42,20 +42,20 @@ export default function Posts({ posts }: PostsProps) {
     );
   }
 
-export const getStaticProps: GetStaticProps = async () => {
-    const response = await prismicClient.getAllByType("Post", {
-      fetch: ["Post.title", "Post.content"],
+  export const getStaticProps: GetStaticProps = async () => {
+    const response = await prismicClient.getAllByType("post", {
+      fetch: ["post.title", "post.content"],
       pageSize: 100,
     });
 
-      console.log(response)
+    console.log(response)
   
     //formatar dados no momento da busca 
     const posts = response.map((post) => {
       return {
         slug: post.uid, //identificador
         title: prismicH.asText(post.data.title), //formatando para texto
-        excerpt: post.data.content,
+        excerpt: post.data.content.find((content) => content.type === "paragraph")?.text ?? "",
         //buscando o primeiro paragrafo do que seja um texto
         //pode acontecer de vir uma imagem ou um título ou algo assim. Aqui, queremos, especificamente, o primeiro parágrafo de texto
         updatedAt: new Date(post.last_publication_date).toLocaleDateString(
