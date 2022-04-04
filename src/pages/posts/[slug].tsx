@@ -45,7 +45,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, params }) =>
     //pegar o slug vindo por params para pegar dados do post
     const { slug } = params
 
-    if (!session.activeSubscription) {
+    if (!session?.activeSubscription) {
         return {
             redirect: {
                 destination: '/',

@@ -1,11 +1,15 @@
+import * as prismicH from "@prismicio/helpers";
+
 import { GetStaticProps } from "next"
-import { getSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { prismicClient } from "../../../services/prismic"
 
-import * as prismicH from "@prismicio/helpers";
 import Head from "next/head";
+import Link from "next/link";
 
 import styles from '../post.module.scss'
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 
 interface PostPreviewProps {
@@ -18,6 +22,15 @@ interface PostPreviewProps {
 }
 
 export default function PostPreview({ post }: PostPreviewProps) {
+    const { data: session } = useSession()
+    const router = useRouter()
+
+    useEffect(() => {
+        if (session?.activeSubscription) {
+            router.push(`/posts/${post.slug}`)
+        }
+    }, [session])
+    
     return (
         <>
             <Head>
@@ -29,13 +42,27 @@ export default function PostPreview({ post }: PostPreviewProps) {
                     <h1>{post.title}</h1>
                     <time>{post.updatedAt}</time>
                     <div
-                        className={styles.postContent}
+                        className={`${styles.postContent} ${styles.previewContent}`}
                         dangerouslySetInnerHTML={{ __html: post.content }} 
                     />
+
+                    <div className={styles.continueReading}>
+                        Calma lá meu patrão, assina aí 🥺
+                        <Link href="/">
+                            <a href="">Subscribe now</a>
+                        </Link>
+                    </div>
                 </article>
             </main>
         </>
     )   
+}
+
+export const getStaticPaths = () => {
+    return {
+        paths: [],
+        fallback: 'blocking'
+    }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
@@ -46,7 +73,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     const post = {
         slug,
         title: prismicH.asText(response.data.title),
-        content: prismicH.asHTML(response.data.content),
+        content: prismicH.asHTML(response.data.content.splice(0, 2)),
         updatedAt: new Date(response.last_publication_date).toLocaleDateString('pt-BR', {
             day: "2-digit",
             month: "long",
@@ -55,6 +82,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     }
 
     return {
-        props: { post }
+        props: { 
+            post,
+        },
+        redirect: 60 * 30, //30 minutos
     }
 }
